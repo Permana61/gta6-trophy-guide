@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GTA 6 Trophy Guide &amp; Tracker — Leonida Checklist</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="masthead">
+  <div class="masthead-inner">
+    <p class="eyebrow">Grand Theft Auto VI &middot; PlayStation 5 &middot; 55 Trofi</p>
+    <h1>Leonida Trophy Guide</h1>
+    <p class="tagline">Panduan dan pelacak trofi GTA 6 — offline, tanpa iklan, tanpa login.
+      Centang trofi yang sudah diraih, ikuti roadmap ke platinum, dan buka panduan tiap trofi beserta sumbernya.</p>
+  </div>
+</header>
+
+<main class="page">
+  <section class="progress-card" aria-label="Progress platinum">
+    <div class="progress-head">
+      <div>
+        <h2>Jalan ke Platinum</h2>
+        <p id="progressText" class="progress-text">Memuat data trofi&hellip;</p>
+      </div>
+      <div class="platinum-badge" id="platinumBadge" title="Vice Got a Price! — raih 54 trofi lainnya">
+        <span class="platinum-icon">P</span>
+        <span>Platinum</span>
+      </div>
+    </div>
+    <div class="progress-track" role="progressbar" aria-label="Progress trofi" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressTrack">
+      <div class="progress-fill" id="progressFill"></div>
+    </div>
+    <ul class="grade-counts" id="gradeCounts"></ul>
+  </section>
+
+  <section class="roadmap-card" aria-label="Roadmap ke platinum">
+    <h2>Roadmap ke Platinum</h2>
+    <p class="section-note">Urutan yang disarankan, disusun dari deskripsi resmi tiap trofi.
+      Selesaikan cerita dulu, lalu stranger, aktivitas, koleksi, dan terakhir bersih-bersih menuju 100%.</p>
+    <ol class="roadmap" id="roadmap"></ol>
+  </section>
+
+  <section class="toolbar" aria-label="Filter dan pencarian">
+    <div class="search-box">
+      <label for="searchInput">Cari trofi</label>
+      <input type="search" id="searchInput" placeholder="Ketik nama trofi&hellip; contoh: Stunts" autocomplete="off">
+    </div>
+    <div class="filter-group" role="group" aria-label="Filter berdasarkan jenis">
+      <span class="filter-label">Jenis:</span>
+      <div class="chips" id="kindChips"></div>
+    </div>
+    <div class="toolbar-actions">
+      <label class="spoiler-toggle">
+        <input type="checkbox" id="spoilerToggle">
+        <span>Sembunyikan spoiler trofi story</span>
+      </label>
+      <button type="button" id="exportBtn" class="btn">Export progress</button>
+      <button type="button" id="importBtn" class="btn">Import progress</button>
+      <input type="file" id="importFile" accept=".json,application/json" hidden>
+      <button type="button" id="resetBtn" class="btn btn-quiet">Reset</button>
+    </div>
+    <p class="toolbar-note" id="resultCount" aria-live="polite"></p>
+  </section>
+
+  <div class="content-grid">
+    <section class="list-card" aria-label="Daftar trofi">
+      <h2 class="visually-hidden">Daftar trofi</h2>
+      <ul class="trophy-list" id="trophyList"></ul>
+      <p class="empty-state" id="emptyState" hidden>Tidak ada trofi yang cocok dengan filter atau pencarianmu.</p>
+    </section>
+
+    <aside class="detail-card" aria-label="Detail trofi" id="detailPanel">
+      <p class="detail-empty">Klik salah satu trofi di daftar untuk melihat panduan lengkapnya,
+        kapan trofi itu bisa terlewat, dan sumber yang dikutip.</p>
+    </aside>
+  </div>
+
+  <footer class="page-foot">
+    <p>Nama, deskripsi, dan grade trofi ditampilkan seperti yang diterbitkan PlayStation.
+      Panduan ditulis dengan kata-kata sendiri untuk entri ini; setiap panduan mencantumkan sumbernya.
+      Panduan ini tidak berafiliasi dengan Rockstar Games dan tidak memakai logo atau artwork resmi.</p>
+    <p>Progress tersimpan di browser kamu (localStorage) dan tidak pernah dikirim ke mana pun.
+      Export mengunduh file JSON; import membaca kembali file itu.</p>
+  </footer>
+</main>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>
