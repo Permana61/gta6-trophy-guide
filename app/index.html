@@ -3,85 +3,130 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>GTA 6 Trophy Guide &amp; Tracker — Leonida Checklist</title>
+<title>Panduan Trofi GTA 6 — Leonida Platinum Tracker</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<header class="masthead">
-  <div class="masthead-inner">
-    <p class="eyebrow">Grand Theft Auto VI &middot; PlayStation 5 &middot; 55 Trofi</p>
-    <h1>Leonida Trophy Guide</h1>
-    <p class="tagline">Panduan dan pelacak trofi GTA 6 — offline, tanpa iklan, tanpa login.
-      Centang trofi yang sudah diraih, ikuti roadmap ke platinum, dan buka panduan tiap trofi beserta sumbernya.</p>
+<header class="topbar">
+  <div class="topbar-inner">
+    <p class="kicker">Grand Theft Auto VI &middot; PlayStation 5 &middot; 55 trofi &middot; 1 platinum &middot; 2 gold &middot; 6 silver &middot; 46 bronze</p>
+    <h1>Leonida Platinum Tracker</h1>
+    <p class="lede">Panduan dan pelacak trofi GTA 6 yang jalan sepenuhnya offline. Setiap trofi membawa nama, deskripsi, dan grade resmi PlayStation, plus panduan langkah-demi-langkah dengan sumber yang dikutip — dan satu peringatan missable yang wajib dibaca sebelum Chapter 1 berakhir.</p>
+    <p class="meta-line" id="metaLine">Memuat data trofi&hellip;</p>
   </div>
 </header>
 
-<main class="page">
-  <section class="progress-card" aria-label="Progress platinum">
-    <div class="progress-head">
-      <div>
-        <h2>Jalan ke Platinum</h2>
-        <p id="progressText" class="progress-text">Memuat data trofi&hellip;</p>
-      </div>
-      <div class="platinum-badge" id="platinumBadge" title="Vice Got a Price! — raih 54 trofi lainnya">
-        <span class="platinum-icon">P</span>
-        <span>Platinum</span>
+<main class="wrap">
+  <section class="dash" aria-label="Ringkasan progres">
+    <div class="ring-box">
+      <svg class="ring" id="ringSvg" viewBox="0 0 160 160" width="160" height="160" role="img" aria-label="Cincin progres platinum">
+        <circle class="ring-bg" cx="80" cy="80" r="68"></circle>
+        <circle class="ring-fg" id="ringFg" cx="80" cy="80" r="68"></circle>
+      </svg>
+      <div class="ring-center">
+        <strong id="earnedBig">0/55</strong>
+        <span id="pctBig">0%</span>
+        <span class="ring-sub">menuju platinum</span>
       </div>
     </div>
-    <div class="progress-track" role="progressbar" aria-label="Progress trofi" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="progressTrack">
-      <div class="progress-fill" id="progressFill"></div>
+    <div class="dash-stats">
+      <h2>Progresmu</h2>
+      <p class="dash-note" id="dashNote">Centang trofi di daftar bawah — progres tersimpan otomatis di browser ini.</p>
+      <ul class="grade-bars" id="gradeBars"></ul>
+      <ul class="cat-stats" id="catStats"></ul>
+      <p class="est-line" id="estLine"></p>
     </div>
-    <ul class="grade-counts" id="gradeCounts"></ul>
+    <div class="nextup" id="nextUpBox">
+      <h2>Selanjutnya: <span id="nextUpName">&mdash;</span></h2>
+      <p id="nextUpWhy"></p>
+      <div class="nextup-meta" id="nextUpMeta"></div>
+      <button type="button" class="btn btn-accent" id="nextUpBtn">Lihat panduannya</button>
+    </div>
   </section>
 
-  <section class="roadmap-card" aria-label="Roadmap ke platinum">
-    <h2>Roadmap ke Platinum</h2>
-    <p class="section-note">Urutan yang disarankan, disusun dari deskripsi resmi tiap trofi.
-      Selesaikan cerita dulu, lalu stranger, aktivitas, koleksi, dan terakhir bersih-bersih menuju 100%.</p>
-    <ol class="roadmap" id="roadmap"></ol>
+  <section class="roadmap" aria-label="Roadmap ke platinum">
+    <h2>Roadmap ke Platinum <span class="h2-sub">6 tahap &middot; ±200 jam &middot; kesulitan 4/10 &middot; 1x playthrough</span></h2>
+    <p class="section-note">Disusun dari deskripsi resmi tiap trofi dan panduan PowerPyx. Tahap 1 cuma punya satu tugas yang tidak bisa ditunda: meditasi balkon Chapter 1. Selebihnya, tidak ada yang missable.</p>
+    <ol class="stages" id="stageList"></ol>
   </section>
 
-  <section class="toolbar" aria-label="Filter dan pencarian">
-    <div class="search-box">
-      <label for="searchInput">Cari trofi</label>
-      <input type="search" id="searchInput" placeholder="Ketik nama trofi&hellip; contoh: Stunts" autocomplete="off">
+  <section class="planner" aria-label="Perencana sesi main">
+    <h2>Perencana Sesi <span class="h2-sub">pilih durasi, dapat daftar trofi yang muat</span></h2>
+    <p class="section-note">Perencana mengambil trofi yang belum diraih, mengurutkannya mengikuti roadmap, dan mengisi sesimu sampai durasinya penuh. Estimasi waktu per trofi tercantum di tiap panduan.</p>
+    <div class="planner-controls">
+      <div class="seg" role="group" aria-label="Durasi sesi">
+        <button type="button" data-mins="30">30 mnt</button>
+        <button type="button" data-mins="60" class="on">60 mnt</button>
+        <button type="button" data-mins="120">2 jam</button>
+        <button type="button" data-mins="180">3 jam</button>
+      </div>
+      <p class="planner-total" id="plannerTotal"></p>
     </div>
-    <div class="filter-group" role="group" aria-label="Filter berdasarkan jenis">
-      <span class="filter-label">Jenis:</span>
-      <div class="chips" id="kindChips"></div>
+    <ol class="plan-list" id="planList"></ol>
+  </section>
+
+  <section class="controls" aria-label="Pencarian dan filter">
+    <div class="search-row">
+      <label for="q">Cari trofi</label>
+      <input type="search" id="q" placeholder="Nama, misi, atau kata kunci — mis. meditasi, bank, drone" autocomplete="off">
+      <span class="keys-hint">Tekan <kbd>/</kbd> untuk cari &middot; <kbd>?</kbd> untuk semua shortcut</span>
     </div>
-    <div class="toolbar-actions">
-      <label class="spoiler-toggle">
-        <input type="checkbox" id="spoilerToggle">
-        <span>Sembunyikan spoiler trofi story</span>
+    <div class="chip-row" id="kindChips" role="group" aria-label="Filter jenis"></div>
+    <div class="filter-row">
+      <label>Grade
+        <select id="gradeSel">
+          <option value="all">Semua grade</option>
+          <option value="platinum">Platinum</option>
+          <option value="gold">Gold</option>
+          <option value="silver">Silver</option>
+          <option value="bronze">Bronze</option>
+        </select>
       </label>
-      <button type="button" id="exportBtn" class="btn">Export progress</button>
-      <button type="button" id="importBtn" class="btn">Import progress</button>
-      <input type="file" id="importFile" accept=".json,application/json" hidden>
-      <button type="button" id="resetBtn" class="btn btn-quiet">Reset</button>
+      <label>Status
+        <select id="statusSel">
+          <option value="all">Semua</option>
+          <option value="todo">Belum diraih</option>
+          <option value="done">Sudah diraih</option>
+        </select>
+      </label>
+      <label class="check-line"><input type="checkbox" id="spoilerBox"> <span>Sembunyikan spoiler trofi story</span></label>
+      <label class="check-line"><input type="checkbox" id="missableBox"> <span>Hanya yang missable / sekali coba</span></label>
     </div>
-    <p class="toolbar-note" id="resultCount" aria-live="polite"></p>
+    <div class="action-row">
+      <button type="button" class="btn" id="exportBtn">Export progress (.json)</button>
+      <button type="button" class="btn" id="importBtn">Import progress</button>
+      <input type="file" id="importFile" accept=".json,application/json" hidden>
+      <button type="button" class="btn" id="printBtn">Cetak / simpan PDF</button>
+      <button type="button" class="btn btn-quiet" id="resetBtn">Reset progres</button>
+      <span class="count-line" id="countLine" aria-live="polite"></span>
+    </div>
+    <div class="shortcuts" id="shortcutsBox" hidden>
+      <h3>Shortcut keyboard</h3>
+      <ul>
+        <li><kbd>/</kbd> fokus ke pencarian</li>
+        <li><kbd>s</kbd> hidup/matikan mode spoiler</li>
+        <li><kbd>p</kbd> cetak / simpan PDF</li>
+        <li><kbd>e</kbd> export progres</li>
+        <li><kbd>Esc</kbd> tutup panel detail</li>
+        <li><kbd>?</kbd> tampilkan/sembunyikan daftar ini</li>
+      </ul>
+    </div>
   </section>
 
-  <div class="content-grid">
-    <section class="list-card" aria-label="Daftar trofi">
-      <h2 class="visually-hidden">Daftar trofi</h2>
-      <ul class="trophy-list" id="trophyList"></ul>
-      <p class="empty-state" id="emptyState" hidden>Tidak ada trofi yang cocok dengan filter atau pencarianmu.</p>
+  <div class="split">
+    <section class="list-col" aria-label="Daftar trofi">
+      <ul class="trophies" id="trophyList"></ul>
+      <p class="empty" id="emptyMsg" hidden>Tidak ada trofi yang cocok dengan filter atau pencarianmu. Coba longgarkan filternya.</p>
     </section>
 
-    <aside class="detail-card" aria-label="Detail trofi" id="detailPanel">
-      <p class="detail-empty">Klik salah satu trofi di daftar untuk melihat panduan lengkapnya,
-        kapan trofi itu bisa terlewat, dan sumber yang dikutip.</p>
+    <aside class="detail" id="detailPane" aria-label="Detail trofi">
+      <p class="detail-hint">Klik salah satu trofi di daftar untuk membuka panduan lengkapnya: langkah demi langkah, kapan bisa terlewat, dan sumber yang dikutip.</p>
     </aside>
   </div>
 
-  <footer class="page-foot">
-    <p>Nama, deskripsi, dan grade trofi ditampilkan seperti yang diterbitkan PlayStation.
-      Panduan ditulis dengan kata-kata sendiri untuk entri ini; setiap panduan mencantumkan sumbernya.
-      Panduan ini tidak berafiliasi dengan Rockstar Games dan tidak memakai logo atau artwork resmi.</p>
-    <p>Progress tersimpan di browser kamu (localStorage) dan tidak pernah dikirim ke mana pun.
-      Export mengunduh file JSON; import membaca kembali file itu.</p>
+  <footer class="foot">
+    <p><strong>Sumber tiap panduan dikutip di samping panduannya.</strong> Nama, deskripsi, dan grade trofi ditampilkan seperti yang diterbitkan PlayStation (sumber: Exophase dan PSNProfiles). Panduan ditulis dengan kata-kata sendiri untuk entri ini — bukan salinan teks panduan lain. Dua trofi kini terkonfirmasi setelah peluncuran (Bad Luck, I Guess dan Ten Pin, menurut PowerPyx); satu laporan masih satu sumber (hewan pemicu Fair Game, menurut DamnModz) dan satu pertanyaan masih terbuka (apakah meditasi Chapter 1 wajib untuk Positive Mental Attitude) — keduanya ditandai jelas di panduannya.</p>
+    <p>Panduan ini tidak berafiliasi dengan Rockstar Games dan tidak memakai logo atau artwork resmi. Semua file berjalan offline dari folder ini; tidak ada request jaringan saat aplikasi dipakai. Progres tersimpan di localStorage browser dan tidak pernah dikirim ke mana pun.</p>
   </footer>
 </main>
 

@@ -1,1 +1,37 @@
-[{"file":"1-cover.jpg","path":"/","viewport":{"height":800,"width":1280}},{"file":"2-guide.jpg","path":"/","scroll":982,"viewport":{"height":800,"width":1280}},{"file":"3-roadmap.jpg","path":"/","viewport":{"height":800,"width":1280}},{"file":"4-spoiler.jpg","path":"/","scroll":772,"viewport":{"height":800,"width":1280}}]
+[
+  {
+    "file": "1-cover.jpg",
+    "path": "/",
+    "viewport": {
+      "height": 800,
+      "width": 1280
+    }
+  },
+  {
+    "file": "2-guide.jpg",
+    "path": "/",
+    "scroll": 6210,
+    "viewport": {
+      "height": 800,
+      "width": 1280
+    }
+  },
+  {
+    "file": "3-roadmap.jpg",
+    "path": "/",
+    "scroll": 618,
+    "viewport": {
+      "height": 800,
+      "width": 1280
+    }
+  },
+  {
+    "file": "4-spoiler.jpg",
+    "path": "/",
+    "scroll": 1440,
+    "viewport": {
+      "height": 800,
+      "width": 1280
+    }
+  }
+]

@@ -1,28 +1,19 @@
-// Memuat dan menormalkan data trofi dari app/data/trophies.json.
+// Data layer for the Leonida Platinum Tracker.
 //
-// Tiap trofi di file itu membawa nama resmi, deskripsi resmi, grade, dan
-// panduan. Kalau file sudah membawa kind, stage, missable, dan sources,
-// nilai itu dipakai apa adanya. Kalau belum, modul ini menurunkannya dari
-// deskripsi resmi — jadi tracker tetap berfungsi penuh dengan data starter
-// maupun data lengkap. Tidak ada yang di sini menebak lokasi atau langkah:
-// yang diturunkan hanya jenis, tahap roadmap, dan penanda missable.
+// Loads app/data/trophies.json (same-origin fetch, no network beyond the
+// local server), normalises every trophy into one shape the UI can render
+// without guessing, and holds the roadmap, grade/kind metadata, and the
+// small pure helpers the tracker needs: per-category stats, the "next up"
+// pick, and the session planner. Nothing here invents a location or a step:
+// every fact the UI shows comes from the JSON file, whose guides cite
+// their sources.
 
 const DATA_URL = 'data/trophies.json';
 
-// Nama misi cerita yang disebut deskripsi resmi. Dipakai untuk mengenali
-// trofi story dan menaruhnya di tahap roadmap yang benar.
-const STORY_MISSIONS = [
-  'Gone Fishing', 'Breakfast Run', 'The Cartel Heist', "Child's Play",
-  'Headliners', 'VCIA Takedown', 'Operation Savage Glory',
-];
-
-// Pemberi misi stranger: trofi "final mission for X" dan strand stranger.
-const STRANGER_GIVERS = ['Andy', 'Kenton', 'Billy', 'Randy', 'Tyrone'];
-
-const KINDS = ['story', 'missable', 'collectibles', 'activities', 'online'];
+export const KINDS = ['story', 'missable', 'collectibles', 'activities', 'online'];
 
 export const KIND_LABELS = {
-  all: 'Semua',
+  all: 'Semua jenis',
   story: 'Story',
   missable: 'Missable',
   collectibles: 'Collectibles',
@@ -30,128 +21,195 @@ export const KIND_LABELS = {
   online: 'Online',
 };
 
-// Tahap roadmap, berurutan dari awal permainan sampai platinum.
-// Data trophies.json menomori tahap 1–6: 1–4 = Chapter 1–4, 5 = setelah
-// cerita (bersih-bersih), 6 = platinum. deriveStage memetakan nomor itu
-// ke id di bawah; kalau data belum bernomor, ia menurunkannya dari deskripsi.
+export const KIND_BLURBS = {
+  story: 'Terbuka lewat misi utama dan chapter.',
+  missable: 'Sekali coba atau berwaktu — baca sebelum terlewat.',
+  collectibles: 'Koleksi dan hitungan yang bisa dilacak di menu Progress.',
+  activities: 'Aktivitas, balapan, dan perampokan di dunia terbuka.',
+  online: 'Tidak ada trofi online di daftar 55 ini.',
+};
+
+export const GRADE_ORDER = ['platinum', 'gold', 'silver', 'bronze'];
+
+export const GRADE_LABELS = {
+  platinum: 'Platinum',
+  gold: 'Gold',
+  silver: 'Silver',
+  bronze: 'Bronze',
+};
+
+export const GRADE_POINTS = { platinum: 4, gold: 3, silver: 2, bronze: 1 };
+
+// The six roadmap stages, in play order. Stage numbers 1-6 in the JSON
+// map straight onto these ids; a trophy without a stage falls back to the
+// cleanup stage so the roadmap never loses a trophy.
 export const ROADMAP_STAGES = [
-  { id: 'chapter-1', number: 1, title: 'Chapter 1', hint: 'Misi pembuka Gone Fishing dan akhir Chapter 1. Trofi story mengalir sendiri.' },
-  { id: 'chapter-2', number: 2, title: 'Chapter 2', hint: 'Misi cerita Chapter 2 plus aktivitas dan koleksi yang sudah terbuka.' },
-  { id: 'chapter-3', number: 3, title: 'Chapter 3', hint: 'Misi cerita Chapter 3 dan trofi sekali coba di tengah cerita.' },
-  { id: 'chapter-4', number: 4, title: 'Chapter 4', hint: 'Misi cerita Chapter 4 dan misi final — selesaikan cerita sampai tamat.' },
-  { id: 'cleanup', number: 5, title: 'Setelah cerita — bersih-bersih', hint: 'Aktivitas, tantangan, koleksi, dan syarat 100% completion.' },
-  { id: 'platinum', number: 6, title: 'Platinum', hint: 'Vice Got a Price! — terbuka otomatis saat 54 trofi lainnya diraih.' },
+  { id: 'stage-1', number: 1, title: 'Chapter 1 — Awal di Leonida', hours: '±5 jam', body: 'Misi pembuka Gone Fishing sampai akhir Chapter 1. Satu tugas tidak bisa ditunda: meditasi balkon rumah Jason setelah Down to Earth.' },
+  { id: 'stage-2', number: 2, title: 'Chapter 2 — Dua karakter', hours: '±15 jam', body: 'Setelah Coffee Break kamu bisa berganti Jason dan Lucia. Questline Kenton, Billy, dan Bret terbuka; garasi dan Scooter Bros mulai bisa dibeli.' },
+  { id: 'stage-3', number: 3, title: 'Chapter 3 — Vice City', hours: '±20 jam', body: 'Misi cerita Chapter 3 plus questline Andy, Randy, dan Tyrone. Payday Loans, Dye Pack Jammer, dan perampokan toko perhiasan terbuka di sini.' },
+  { id: 'stage-4', number: 4, title: 'Chapter 4 — Menuju akhir', hours: '±20 jam', body: 'Misi cerita Chapter 4 dan misi finalnya. Perampokan brankas bank terbuka lewat misi opsional That\'s Where The Money Is….' },
+  { id: 'stage-5', number: 5, title: 'Setelah cerita — bersih-bersih', hours: '±100 jam', body: 'Checklist 100% terbuka di Progress > Stats. Stunt, challenge, koleksi, balapan, drone, dan semua yang butuh hitungan penuh dikerjakan di free-roam.' },
+  { id: 'stage-6', number: 6, title: 'Platinum', hours: 'otomatis', body: 'Vice Got a Price! terbuka sendiri begitu 54 trofi lainnya diraih. Tidak ada syarat online atau DLC.' },
 ];
 
 const STAGE_BY_NUMBER = Object.fromEntries(ROADMAP_STAGES.map((s) => [s.number, s.id]));
-const STAGE_IDS = new Set(ROADMAP_STAGES.map((s) => s.id));
 
-function textOf(value) {
+function asText(value) {
   return typeof value === 'string' ? value : '';
 }
 
-function hasField(trophy, field) {
-  return trophy[field] !== undefined && trophy[field] !== null && trophy[field] !== '';
+function asNumber(value, fallback) {
+  const n = Number(value);
+  return Number.isFinite(n) ? n : fallback;
 }
 
-// Jenis trofi dari deskripsi resmi. "Online" tidak muncul di daftar 55 ini,
-// tapi filternya tetap disediakan sesuai spek — hasilnya kosong.
-export function deriveKind(trophy) {
-  if (hasField(trophy, 'kind')) return normalizeKinds(trophy.kind);
-  const d = textOf(trophy.description);
-  if (/complete chapter \d/i.test(d)) return ['story'];
-  if (/complete (the final mission|gone fishing)/i.test(d)) return ['story'];
-  if (STORY_MISSIONS.some((m) => d.includes(m))) return ['story'];
-  if (/final mission for/i.test(d)) return ['story'];
-  if (/stranger/i.test(d)) return ['story'];
-  if (/collectible card|waink it|discover \d+ vehicles|explore all|garage propert|register \d+ vehicles/i.test(d)) return ['collectibles'];
-  if (/stunt|shooting range|drone race|race|fishing challenge|arcade|meditate|bowl|challenge|hunt/i.test(d)) return ['activities'];
-  return ['activities'];
-}
-
-// "kind" di data bisa berupa string ("story") atau daftar
-// (["activities", "collectibles"], ["collectibles", "missable"]).
-// Selalu kembalikan daftar jenis yang dikenal, tanpa duplikat.
-export function normalizeKinds(rawKind) {
-  const list = Array.isArray(rawKind) ? rawKind : [rawKind];
-  const kinds = [];
+function cleanKinds(raw) {
+  const list = Array.isArray(raw) ? raw : [raw];
+  const out = [];
   for (const entry of list) {
     const kind = String(entry ?? '').toLowerCase();
-    if (KINDS.includes(kind) && !kinds.includes(kind)) kinds.push(kind);
+    if (KINDS.includes(kind) && !out.includes(kind)) out.push(kind);
   }
-  return kinds.length > 0 ? kinds : ['activities'];
+  return out.length ? out : ['activities'];
 }
 
-// Trofi missable: yang deskripsinya menuntut momen sekali coba atau
-// rangkaian tanpa gagal (misalnya beruntun, tanpa ketahuan, sekali jalan).
-// Trofi misi cerita biasa TIDAK ditandai missable: misi bisa diulang.
-export function deriveMissable(trophy, kinds) {
-  if (typeof trophy.missable === 'boolean') return trophy.missable;
-  if (kinds.includes('missable')) return true;
-  const d = textOf(trophy.description);
-  return /back-to-back|without being detected|without losing|second time|unscheduled departure|melee drive-by/i.test(d);
-}
-
-export function deriveStage(trophy, kinds) {
-  if (typeof trophy.stage === 'number' && STAGE_BY_NUMBER[trophy.stage]) return STAGE_BY_NUMBER[trophy.stage];
-  if (typeof trophy.stage === 'string') {
-    const asNumber = Number(trophy.stage);
-    if (STAGE_BY_NUMBER[asNumber]) return STAGE_BY_NUMBER[asNumber];
-    if (STAGE_IDS.has(trophy.stage)) return trophy.stage;
-  }
-  const d = textOf(trophy.description);
-  if (trophy.grade === 'platinum') return 'platinum';
-  if (/attain 100% completion/i.test(d)) return 'cleanup';
-  const chapter = d.match(/complete chapter (\d)/i);
-  if (chapter) return STAGE_BY_NUMBER[Math.min(Number(chapter[1]), 4)] ?? 'cleanup';
-  if (/complete gone fishing/i.test(d)) return 'chapter-1';
-  if (/complete the final mission/i.test(d)) return 'chapter-4';
-  if (STORY_MISSIONS.some((m) => d.includes(m))) return 'chapter-4';
-  if (/final mission for/i.test(d) || /stranger/i.test(d)) return 'cleanup';
-  if (kinds.includes('collectibles')) return 'cleanup';
-  if (kinds.includes('activities')) return 'cleanup';
-  return 'cleanup';
-}
-
-function normalizeSources(trophy) {
-  const raw = trophy.sources;
+function cleanSources(raw) {
   if (!Array.isArray(raw)) return [];
-  return raw
-    .map((s) => {
-      if (typeof s === 'string') return { name: s, url: '' };
-      if (s && typeof s === 'object') return { name: textOf(s.name) || textOf(s.title) || 'Sumber', url: textOf(s.url) || textOf(s.link) };
-      return null;
-    })
-    .filter((s) => s && s.name);
+  const out = [];
+  for (const item of raw) {
+    if (typeof item === 'string' && item) {
+      out.push({ name: item, url: '' });
+    } else if (item && typeof item === 'object' && asText(item.name)) {
+      out.push({ name: asText(item.name), url: asText(item.url) || asText(item.link) });
+    }
+  }
+  return out;
 }
 
-export function normalizeTrophy(raw, index) {
-  const kinds = deriveKind(raw);
-  // Jenis utama untuk label: yang pertama selain "missable" (missable
-  // sudah punya lencananya sendiri).
-  const kind = kinds.find((k) => k !== 'missable') ?? kinds[0];
+function cleanSteps(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw.map((s) => asText(s)).filter((s) => s.length > 0);
+}
+
+// One trophy, normalised: every field the UI touches exists, with a sane
+// default, so a missing optional field can never break the render.
+export function normaliseTrophy(raw, index) {
+  const kinds = cleanKinds(raw.kind);
+  const grade = String(raw.grade || 'bronze').toLowerCase();
+  const stageNumber = asNumber(raw.stage, 5);
   return {
-    id: raw.id ?? index + 1,
-    name: textOf(raw.name),
-    description: textOf(raw.description),
-    grade: String(raw.grade || 'bronze').toLowerCase(),
-    guide: textOf(raw.guide),
-    kind,
-    kinds,
-    stage: deriveStage(raw, kinds),
-    missable: deriveMissable(raw, kinds),
+    id: asNumber(raw.id, index + 1),
+    name: asText(raw.name),
+    description: asText(raw.description),
+    grade: GRADE_ORDER.includes(grade) ? grade : 'bronze',
     hidden: raw.hidden === true,
-    sources: normalizeSources(raw),
+    count: raw.count === null || raw.count === undefined ? null : asNumber(raw.count, null),
+    kind: kinds,
+    kinds,
+    mainKind: kinds.find((k) => k !== 'missable') ?? kinds[0],
+    missable: raw.missable === true || kinds.includes('missable'),
+    stage: STAGE_BY_NUMBER[stageNumber] ?? 'stage-5',
+    stageNumber: STAGE_BY_NUMBER[stageNumber] ? stageNumber : 5,
+    difficulty: Math.min(5, Math.max(1, asNumber(raw.difficulty, 2))),
+    timeMinutes: Math.max(0, asNumber(raw.timeMinutes, 0)),
+    guide: asText(raw.guide),
+    steps: cleanSteps(raw.steps),
+    sources: cleanSources(raw.sources),
   };
 }
 
 export async function loadTrophies() {
   const response = await fetch(DATA_URL);
-  if (!response.ok) throw new Error('Gagal memuat data trofi');
+  if (!response.ok) throw new Error('Gagal memuat data trofi: ' + response.status);
   const doc = await response.json();
   const list = Array.isArray(doc) ? doc : doc.trophies;
-  if (!Array.isArray(list)) throw new Error('Format data trofi tidak dikenal');
-  return list.map((raw, index) => normalizeTrophy(raw, index));
+  if (!Array.isArray(list) || list.length === 0) throw new Error('Data trofi kosong');
+  return list.map((raw, index) => normaliseTrophy(raw, index));
 }
 
-export { KINDS };
+// "±45 mnt", "2 jam", "±3,5 jam", or "Otomatis" for story trophies with
+// no extra time of their own.
+export function formatMinutes(minutes) {
+  if (!minutes || minutes <= 0) return 'Otomatis';
+  if (minutes < 60) return '±' + minutes + ' mnt';
+  const hours = minutes / 60;
+  const shown = Number.isInteger(hours) ? String(hours) : hours.toFixed(1).replace('.', ',');
+  return '±' + shown + ' jam';
+}
+
+export function difficultyLabel(level) {
+  return ['Sangat mudah', 'Mudah', 'Sedang', 'Sulit', 'Sangat sulit'][level - 1] ?? 'Sedang';
+}
+
+// Earned counts per grade, per kind, and per roadmap stage.
+export function computeStats(trophies, earned) {
+  const byGrade = {};
+  for (const grade of GRADE_ORDER) {
+    const all = trophies.filter((t) => t.grade === grade);
+    byGrade[grade] = { total: all.length, done: all.filter((t) => earned.has(t.id)).length };
+  }
+  const byKind = {};
+  for (const kind of KINDS) {
+    const all = trophies.filter((t) => t.kinds.includes(kind));
+    byKind[kind] = { total: all.length, done: all.filter((t) => earned.has(t.id)).length };
+  }
+  const byStage = {};
+  for (const stage of ROADMAP_STAGES) {
+    const all = trophies.filter((t) => t.stage === stage.id);
+    byStage[stage.id] = { total: all.length, done: all.filter((t) => earned.has(t.id)).length };
+  }
+  const remaining = trophies.filter((t) => !earned.has(t.id));
+  const remainingMinutes = remaining.reduce((sum, t) => sum + t.timeMinutes, 0);
+  return {
+    total: trophies.length,
+    done: earned.size,
+    byGrade,
+    byKind,
+    byStage,
+    remainingMinutes,
+  };
+}
+
+// "Next up": the earliest-roadmap unearned trophy, preferring the one
+// missable trophy first (it is the only one that can be lost), then the
+// lowest stage, then the shortest time. Returns null when all are done.
+export function suggestNext(trophies, earned) {
+  const todo = trophies.filter((t) => !earned.has(t.id));
+  if (todo.length === 0) return null;
+  const missable = todo.find((t) => t.missable);
+  if (missable) return { trophy: missable, reason: 'Satu-satunya trofi yang bisa terlewat — kerjakan sebelum Chapter 1 berakhir.' };
+  const sorted = [...todo].sort((a, b) => {
+    if (a.stageNumber !== b.stageNumber) return a.stageNumber - b.stageNumber;
+    if (a.timeMinutes !== b.timeMinutes) return a.timeMinutes - b.timeMinutes;
+    return a.id - b.id;
+  });
+  const pick = sorted[0];
+  return {
+    trophy: pick,
+    reason: pick.stageNumber <= 4
+      ? 'Trofi story/aktivitas paling awal yang belum diraih di roadmap.'
+      : 'Trofi bersih-bersih paling cepat yang tersisa.',
+  };
+}
+
+// Session planner: fill a session of `minutes` with unearned trophies in
+// roadmap order, skipping the platinum itself and anything longer than the
+// session. Returns the picked trophies and the summed estimate.
+export function planSession(trophies, earned, minutes) {
+  const pool = trophies
+    .filter((t) => !earned.has(t.id) && t.grade !== 'platinum' && t.timeMinutes > 0 && t.timeMinutes <= minutes)
+    .sort((a, b) => {
+      if (a.stageNumber !== b.stageNumber) return a.stageNumber - b.stageNumber;
+      if (a.timeMinutes !== b.timeMinutes) return a.timeMinutes - b.timeMinutes;
+      return a.id - b.id;
+    });
+  const picked = [];
+  let used = 0;
+  for (const trophy of pool) {
+    if (used + trophy.timeMinutes > minutes) continue;
+    picked.push(trophy);
+    used += trophy.timeMinutes;
+    if (picked.length >= 8) break;
+  }
+  return { picked, usedMinutes: used, budgetMinutes: minutes };
+}
